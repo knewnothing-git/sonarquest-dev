@@ -82,3 +82,11 @@ make up
 
 Earlier strategy work on a MISRA / ISO 26262 automotive vertical.
 Retained as reference — not the current direction.
+
+## Contributing
+
+Contributions welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup,
+project structure, and how to add a scanner or language.
+
+The most useful thing you can send us is a false positive report with a
+reproducing snippet.
