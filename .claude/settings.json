@@ -1,0 +1,51 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//**)",
+      "Grep(//**)",
+      "Glob(//**)",
+      "Edit(//spike/**)",
+      "Edit(//validation/**)",
+      "Edit(//graph/state.json)",
+      "Edit(//DECISIONS.md)",
+      "Write(//spike/**)",
+      "Write(//validation/**)",
+      "Bash(cmake:*)",
+      "Bash(make:*)",
+      "Bash(ctest:*)",
+      "Bash(clang:*)",
+      "Bash(clang-format:*)",
+      "Bash(clang-tidy:*)",
+      "Bash(cppcheck:*)",
+      "Bash(docker build:*)",
+      "Bash(docker run:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "WebSearch",
+      "WebFetch"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Edit(//graph/nodes.yaml)",
+      "Edit(//CLAUDE.md)",
+      "Edit(//docs/**)"
+    ],
+    "deny": [
+      "Read(//.env)",
+      "Read(//**/*.key)",
+      "Read(//**/*.pem)",
+      "Read(//**/credentials.json)",
+      "Bash(git push --force:*)",
+      "Bash(rm -rf:*)"
+    ]
+  },
+
+  "_notes": {
+    "graph_nodes": "nodes.yaml is the contract. Changing it mid-flight is how gates get quietly relaxed, so it requires explicit approval.",
+    "docs": "Strategy docs are decisions, not drafts. Edits go through the human.",
+    "push": "Always ask. Nothing reaches the remote without a human seeing the diff."
+  }
+}

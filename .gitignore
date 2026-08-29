@@ -11,4 +11,20 @@ dist/
 # Secrets
 *.key
 *.pem
-credentials.json
+credentials.json## Agent workspace
+
+- `graph/state.json` is written by agents and changes constantly.
+  It is tracked deliberately — do not add it here.
+- Spike build output and acquired corpora are not.
+
+spike/out/
+spike/build/
+spike/corpus/
+spike/reports/*.json
+compile_commands.json
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

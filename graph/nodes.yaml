@@ -1,0 +1,253 @@
+# SonarQuest task graph
+#
+# Nodes are work units in a DAG. A node is workable when every id in
+# `deps` is done AND `gate` evaluates true against graph/state.json.
+#
+# `verify` is the completion predicate. A node is not done until it
+# passes. "Looks right" is not passing.
+#
+# human_only: true  -> Claude must surface this and stop. Never simulate.
+
+meta:
+  version: 1
+  updated: 2026-08-29
+
+gates:
+  phase0_go:
+    expr: "phase0.decision == 'GO'"
+    description: >
+      At least 8 of 15 discovery calls scored 4 or higher on the pain
+      thesis. Set only by the human via /score. See docs/04-phase-0.md.
+  legal_clear:
+    expr: "legal.misra_opinion == 'received' and legal.path != 'blocked'"
+    description: >
+      Written IP counsel opinion on MISRA text licensing in hand, and it
+      does not close off a viable path.
+  spike_green:
+    expr: "spike.fp_rate_measured == true and spike.fp_rate <= 0.15"
+    description: >
+      Engine spike has a measured false-positive rate at or under 15% on
+      a real codebase. Unmeasured is not green.
+
+nodes:
+
+# ---------------------------------------------------------------
+# TRACK: phase-0  — market validation. Human-led.
+# ---------------------------------------------------------------
+
+  - id: P0-01
+    track: phase-0
+    title: Email MISRA on licensing
+    deps: []
+    gate: always
+    agent: scribe
+    human_only: false
+    do: >
+      Draft the four-question licensing email from docs/04-phase-0.md
+      section 6. Human sends it. Record send date in state.
+    verify: "state.legal.misra_email_sent has a date"
+
+  - id: P0-02
+    track: phase-0
+    title: Engage IP counsel on MISRA text
+    deps: [P0-01]
+    gate: always
+    agent: human
+    human_only: true
+    do: >
+      Brief counsel with the six questions in docs/04-phase-0.md.
+      Budget INR 50k-1.5L. Written opinion required, not verbal.
+    verify: "state.legal.misra_opinion == 'received'"
+
+  - id: P0-03
+    track: phase-0
+    title: Build 60-name target list
+    deps: []
+    gate: always
+    agent: researcher
+    human_only: false
+    do: >
+      Expand the four tranches in docs/04-phase-0.md into a working
+      tracker at validation/targets.md. Columns: company, tranche,
+      contact, role, city, source, status, date_contacted.
+      Verify each company still exists and the role is plausible - the
+      doc list is from general knowledge, not verified.
+    verify: "validation/targets.md has >= 60 rows with named roles"
+
+  - id: P0-04
+    track: phase-0
+    title: Outreach wave 1 (consultants + EV first)
+    deps: [P0-03]
+    gate: always
+    agent: human
+    human_only: true
+    do: "40 LinkedIn messages using template A. Consultants first."
+    verify: "state.phase0.outreach_sent >= 40"
+
+  - id: P0-05
+    track: phase-0
+    title: Conduct 15 discovery calls
+    deps: [P0-04]
+    gate: always
+    agent: human
+    human_only: true
+    do: >
+      Run the script in docs/04-phase-0.md. Never pitch. Log each call
+      within 30 minutes via /log-call. Q12 (where does the GCS live) is
+      the kill-shot question - it must be asked in every call.
+    verify: "count(validation/calls/*.md) >= 15"
+
+  - id: P0-06
+    track: phase-0
+    title: Score and decide GO/NO-GO
+    deps: [P0-05]
+    gate: always
+    agent: researcher
+    human_only: false
+    do: >
+      Tally scores across all call notes. Report the count scoring 4+.
+      Report the Q12 distribution verbatim. Do not recommend - present
+      the number against the pre-registered threshold and let the human
+      decide.
+    verify: "state.phase0.decision in ['GO','NO-GO','RESEGMENT']"
+
+# ---------------------------------------------------------------
+# TRACK: spike — engine de-risking. Parallel to phase-0.
+# Does NOT depend on the Phase 0 outcome.
+# ---------------------------------------------------------------
+
+  - id: SP-01
+    track: spike
+    title: Clang/LLVM toolchain builds in Docker
+    deps: []
+    gate: always
+    agent: rule-engineer
+    human_only: false
+    do: >
+      Make spike/docker/Dockerfile build a container with LLVM/Clang
+      LibTooling and CMake. Build spike/src into a runnable binary that
+      accepts a compile_commands.json path and exits 0.
+      The scaffolding in spike/ is UNVERIFIED - it has never been
+      compiled. Expect to fix it.
+    verify: "docker build succeeds AND sq-analyze --version exits 0"
+
+  - id: SP-02
+    track: spike
+    title: Parse a real ECU codebase
+    deps: [SP-01]
+    gate: always
+    agent: rule-engineer
+    human_only: false
+    do: >
+      Acquire an open-source automotive-representative C codebase
+      (candidates: an AUTOSAR-style OSS stack, FreeRTOS, a BMS firmware
+      project). Generate compile_commands.json via bear or CMake.
+      Parse it end to end without crashing.
+    verify: "parses >= 95% of translation units without error"
+
+  - id: SP-03
+    track: spike
+    title: Implement 10 decidable single-TU MISRA rules
+    deps: [SP-02]
+    gate: always
+    agent: rule-engineer
+    human_only: false
+    do: >
+      Follow .claude/skills/misra-rule. Pick 10 high-frequency
+      Mandatory/Required rules decidable within one translation unit.
+      Rule identifiers only - never guideline text.
+      Each rule ships with positive AND negative test cases.
+    verify: "10 rules implemented AND own test suite 100% green"
+
+  - id: SP-04
+    track: spike
+    title: Stable violation fingerprinting
+    deps: [SP-03]
+    gate: always
+    agent: rule-engineer
+    human_only: false
+    do: >
+      Implement fingerprint on (rule_id, normalized AST context hash,
+      enclosing symbol). Prove stability under reformat and refactor.
+    verify: >
+      clang-format over the whole codebase changes 0 fingerprints.
+      Renaming an unrelated function changes only fingerprints inside
+      that function.
+
+  - id: SP-05
+    track: spike
+    title: Measure false-positive rate against ground truth
+    deps: [SP-04]
+    gate: always
+    agent: verifier
+    human_only: false
+    do: >
+      Sample 100 reported violations at random. Adjudicate each against
+      rule intent. Report precision with a confidence interval. Compare
+      against Cppcheck's MISRA addon on the same code.
+      This is adversarial - try to break our own rules.
+    verify: "spike/reports/fp-rate.md exists with n>=100 and a stated CI"
+
+  - id: SP-06
+    track: spike
+    title: Ship deployable spike image
+    deps: [SP-05]
+    gate: spike_green
+    agent: rule-engineer
+    human_only: false
+    do: >
+      Publish a container taking a repo path and emitting a JSON
+      violation report with stable fingerprints. Document exactly which
+      rules are covered and the measured precision. Honesty about
+      coverage is a feature in this market.
+    verify: "docker run on a clean host produces a valid JSON report"
+
+# ---------------------------------------------------------------
+# TRACK: product — BLOCKED until Phase 0 returns GO.
+# Definitions exist so the shape is visible, not so they can start.
+# ---------------------------------------------------------------
+
+  - id: PR-01
+    track: product
+    title: GRP editor and multi-GRP data model
+    deps: [P0-06, SP-06]
+    gate: phase0_go
+    agent: rule-engineer
+    human_only: false
+    do: "See docs/02-product.md Module 2."
+    verify: "Models a real design-partner project structure"
+
+  - id: PR-02
+    track: product
+    title: Deviation register with approval workflow
+    deps: [PR-01]
+    gate: phase0_go
+    agent: rule-engineer
+    human_only: false
+    do: "raise -> rationale -> risk -> reviewer -> approver -> expiry"
+    verify: "A design partner runs a real deviation end to end"
+
+  - id: PR-03
+    track: product
+    title: Violation to deviation clustering
+    deps: [PR-02]
+    gate: phase0_go
+    agent: rule-engineer
+    human_only: false
+    do: "Cluster violations into common-use-case deviation groups."
+    verify: "10k violations reduce to fewer than 50 groups"
+
+  - id: PR-04
+    track: product
+    title: GEP and GCS generator
+    deps: [PR-03]
+    gate: [phase0_go, legal_clear]
+    agent: rule-engineer
+    human_only: false
+    do: >
+      Generate the Guideline Enforcement Plan from tool config, and the
+      Guideline Compliance Summary per the MISRA:2020 compliance-level
+      matrix. This is the product. Everything else is supporting cast.
+    verify: >
+      A practising Functional Safety Manager reviews the output and
+      calls it audit-ready. Not a proxy metric - an actual person.

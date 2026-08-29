@@ -1,0 +1,51 @@
+{
+  "_comment": "Source of truth for node status. Update via /next and /score. Never guess a value here - unknown is 'unset'.",
+  "updated": "2026-08-29",
+
+  "phase0": {
+    "decision": "unset",
+    "outreach_sent": 0,
+    "calls_logged": 0,
+    "calls_scoring_4plus": 0,
+    "threshold": 8,
+    "threshold_locked": true,
+    "_note": "threshold_locked means the go/no-go bar was set before data collection and must not be moved afterwards"
+  },
+
+  "legal": {
+    "misra_email_sent": null,
+    "misra_reply": "unset",
+    "misra_opinion": "unset",
+    "path": "unset",
+    "_note": "path: one of unset | rule-ids-only | licensed | customer-supplied | blocked"
+  },
+
+  "spike": {
+    "fp_rate_measured": false,
+    "fp_rate": null,
+    "rules_implemented": 0,
+    "corpus": null,
+    "_note": "fp_rate is precision loss on a random sample of >=100 adjudicated violations"
+  },
+
+  "nodes": {
+    "P0-01": "ready",
+    "P0-02": "blocked",
+    "P0-03": "ready",
+    "P0-04": "blocked",
+    "P0-05": "blocked",
+    "P0-06": "blocked",
+
+    "SP-01": "ready",
+    "SP-02": "blocked",
+    "SP-03": "blocked",
+    "SP-04": "blocked",
+    "SP-05": "blocked",
+    "SP-06": "blocked",
+
+    "PR-01": "blocked",
+    "PR-02": "blocked",
+    "PR-03": "blocked",
+    "PR-04": "blocked"
+  }
+}
