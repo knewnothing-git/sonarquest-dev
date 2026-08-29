@@ -1,15 +1,20 @@
 {
-  "_comment": "Source of truth for node status. Update via /next and /score. Never guess a value here - unknown is 'unset'.",
+  "_comment": "Source of truth for node status. Unknown is 'unset' or null, never a plausible placeholder. Claude never sets fields marked owner:yogesh.",
   "updated": "2026-08-29",
+  "graph_version": 2,
+
+  "mode": "driver",
+  "_mode_note": "driver = one step at a time, stop after each. autopilot must be granted per-node, out loud, and never carries over.",
 
   "phase0": {
     "decision": "unset",
+    "_decision_owner": "yogesh",
     "outreach_sent": 0,
     "calls_logged": 0,
     "calls_scoring_4plus": 0,
     "threshold": 8,
     "threshold_locked": true,
-    "_note": "threshold_locked means the go/no-go bar was set before data collection and must not be moved afterwards"
+    "_note": "threshold was set before data collection and must not move afterwards"
   },
 
   "legal": {
@@ -17,15 +22,19 @@
     "misra_reply": "unset",
     "misra_opinion": "unset",
     "path": "unset",
-    "_note": "path: one of unset | rule-ids-only | licensed | customer-supplied | blocked"
+    "_note": "path: unset | rule-ids-only | licensed | customer-supplied | blocked"
   },
 
-  "spike": {
-    "fp_rate_measured": false,
-    "fp_rate": null,
-    "rules_implemented": 0,
+  "prototype": {
     "corpus": null,
-    "_note": "fp_rate is precision loss on a random sample of >=100 adjudicated violations"
+    "_corpus_owner": "yogesh",
+    "findings_normalized": false,
+    "fingerprints_stable": false,
+    "gcs_generated": false,
+    "gcs_judged": false,
+    "gcs_verdict": "unset",
+    "_gcs_verdict_owner": "yogesh",
+    "_note": "gcs_verdict: unset | accept | needs-work | reject. This is a professional judgment, not a metric. Claude never sets it."
   },
 
   "nodes": {
@@ -36,16 +45,15 @@
     "P0-05": "blocked",
     "P0-06": "blocked",
 
-    "SP-01": "ready",
-    "SP-02": "blocked",
-    "SP-03": "blocked",
-    "SP-04": "blocked",
-    "SP-05": "blocked",
-    "SP-06": "blocked",
+    "TP-01": "ready",
+    "TP-02": "ready",
+    "TP-03": "blocked",
+    "TP-04": "blocked",
+    "TP-05": "blocked",
+    "TP-06": "blocked",
+    "TP-07": "blocked",
 
     "PR-01": "blocked",
-    "PR-02": "blocked",
-    "PR-03": "blocked",
-    "PR-04": "blocked"
+    "PR-02": "blocked"
   }
 }

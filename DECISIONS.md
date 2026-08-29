@@ -153,3 +153,86 @@ Their go-to-market motion is directly transferable:
 - Platform plus consulting hybrid
 - Strategic investor for credibility (theirs: PwC; ours would be a TÜV,
   a notified body, or an Indian ESP)
+
+---
+
+## D-009 — Replace the C++ engine spike with a thin Python prototype
+
+**Date:** 2026-08-29 · **Status:** Decided · **Supersedes:** part of D-003 execution plan
+
+The v1 graph had a `spike` track: build a Clang/LLVM MISRA analyzer from
+scratch, implement 10 rules, measure false-positive rate.
+
+**Rejected because the decision maker cannot verify it.**
+
+Yogesh's background is automotive quality engineering, not compiler
+engineering. A track whose outputs are AST matchers and precision
+intervals gives him nothing he can independently judge — he would be
+approving work on trust, which is how non-technical solo founders lose
+control of their own product.
+
+Worse, it left his actual expertise unused. He has ten years of PPAP and
+audit documentation experience. The question "would an OEM assessor
+reject this compliance summary" is one almost nobody can answer well, and
+he is one of them.
+
+**Replacement:** a thin Python prototype that wraps Cppcheck's MISRA
+addon for detection and builds only the evidence layer — deviation
+register, GRP, and Guideline Compliance Summary generation.
+
+| | C++ engine spike | Thin prototype |
+|---|---|---|
+| Language | C++ / Clang LibTooling | Python |
+| Detection | Built from scratch | Existing OSS addon |
+| Terminal artifact | A precision figure | A GCS document |
+| Who judges it | The agent that built it | Yogesh, from his own audit experience |
+| Time to demoable | 8–12 weeks | 2–3 weeks |
+
+**It also tests the actual thesis.** D-004 says the compliance workflow is
+the pain, not the detection. Wrapping a detector and building only the
+workflow is the direct test of that claim. Building a detector first
+tested something the thesis does not depend on.
+
+**Known constraint:** Cppcheck's MISRA addon is GPL-3.0. The prototype is
+therefore validation and demo only, never shippable. Replacing the
+detector is node PR-02, post-Phase-0, funded, and probably not solo.
+
+**Reverses if:** Phase 0 confirms the thesis, revenue exists, and the
+detector becomes the binding constraint. At that point the C++ work
+returns as a staffed project rather than a solo one.
+
+---
+
+## D-010 — Operating model: driver mode, autonomy bounded by verifiability
+
+**Date:** 2026-08-29 · **Status:** Decided
+
+Governing principle for all agent work on this project:
+
+> Agent autonomy on any task is limited by Yogesh's ability to verify the
+> output. Where he can check the result, agents work and report. Where he
+> cannot, they stop and surface the decision in terms he can judge.
+
+**Mechanisms:**
+
+- `mode: driver` in `graph/state.json` — one step, then stop. Autopilot
+  is granted per-node, out loud, and never carries across nodes.
+- `he_verifies: true` on any node whose completion is a professional
+  judgment call. Agents present evidence and stop; they never mark these
+  done.
+- `_owner: yogesh` on state fields agents may not write —
+  `phase0.decision`, `prototype.corpus`, `prototype.gcs_verdict`.
+- `/brief` command — translates project state into plain language and
+  names the decisions waiting on him. Session entry point.
+- Agents are instructed to report artifacts, not code, and to convert
+  metrics into questions answerable from domain experience.
+
+**Why this matters more than usual here:** the failure mode for a
+non-technical founder running agentic workflows is silent. Bad work looks
+identical to good work in a diff you cannot read, and the cost surfaces
+months later. Structural constraints are the only reliable defence;
+intending to review carefully is not one.
+
+**Reverses if:** never in spirit. The specific mechanisms can change as
+his familiarity with the codebase grows — a node that needs approval
+today may not in a year.

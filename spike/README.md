@@ -1,3 +1,14 @@
+> **DEFERRED — not staffed, not scheduled.**
+>
+> This track was replaced by the thin Python prototype. See
+> `DECISIONS.md` D-009 and the `prototype` track in `graph/nodes.yaml`.
+>
+> Reason: the decision maker on this project is a quality engineer, not a
+> compiler engineer. A track whose outputs are AST matchers and precision
+> intervals cannot be independently verified by him. The C++ work returns
+> post-revenue as a staffed project, at node PR-02.
+>
+> Everything below is preserved for that point. None of it has been built.
 # Engine Spike
 
 **Status: scaffolding only. Never compiled. Node SP-01 is to make it build.**
