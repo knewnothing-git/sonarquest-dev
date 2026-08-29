@@ -21,7 +21,7 @@ labels: false-positive
 
 **Scanner**
 
-- [ ] Semgrep (SAST)
+- [ ] OpenGrep (SAST)
 - [ ] Grype / OSV (vulnerabilities)
 - [ ] ScanCode (licenses)
 - [ ] Syft (SBOM)

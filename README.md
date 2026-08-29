@@ -10,7 +10,7 @@ compliance).
 
 ## What it does
 
-**Code analysis** — multi-language SAST via Semgrep, security and quality
+**Code analysis** — multi-language SAST via OpenGrep, security and quality
 findings, fingerprinted so suppressions survive refactoring, baseline
 diffing so you can enforce on new code only, quality gates that fail CI.
 
@@ -26,7 +26,7 @@ Black Duck does not do SAST. That gap is the product.
 ## Stack
 
 Python 3.12 / FastAPI / Celery / PostgreSQL / Redis · React + Vite +
-TypeScript + Tailwind · Semgrep, Syft, Grype, OSV, ScanCode · Docker
+TypeScript + Tailwind · OpenGrep, Syft, Grype, OSV, ScanCode · Docker
 
 ---
 
@@ -90,3 +90,14 @@ project structure, and how to add a scanner or language.
 
 The most useful thing you can send us is a false positive report with a
 reproducing snippet.
+
+
+## Licence
+
+**AGPL-3.0.** Free to self-host, modify and use. If you run a modified
+version as a network service, you must publish your changes.
+
+A commercial licence is available for organisations that cannot use AGPL.
+See [docs/BUSINESS-MODEL.md](docs/BUSINESS-MODEL.md).
+
+Contributors: see [CLA.md](CLA.md).

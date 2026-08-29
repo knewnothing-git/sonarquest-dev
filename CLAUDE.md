@@ -46,7 +46,7 @@ Backend       Python 3.12, FastAPI, SQLAlchemy 2.x, Alembic
 Worker        Celery + Redis
 Database      PostgreSQL 16
 Frontend      React 18 + Vite + TypeScript + Tailwind
-Scanners      Semgrep (SAST), Syft (SBOM), Grype + OSV (vulns), ScanCode (licenses)
+Scanners      OpenGrep (SAST), Syft (SBOM), Grype + OSV (vulns), ScanCode (licenses)
 Packaging     Docker, docker-compose
 Tests         pytest, vitest
 Lint          ruff, mypy, eslint
@@ -85,7 +85,7 @@ GitHub/GitLab webhook
    Celery queue (Redis)
         v
    Scanner worker (Docker)
-     ├─ Semgrep      -> code findings
+     ├─ OpenGrep     -> code findings
      ├─ Syft         -> SBOM components
      ├─ Grype/OSV    -> vulnerabilities
      └─ ScanCode     -> licenses

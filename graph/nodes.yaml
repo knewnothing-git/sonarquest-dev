@@ -62,11 +62,12 @@ nodes:
     verify: "pytest backend/tests/test_ingest.py -q"
 
   - id: F-05
-    title: SAST runner (Semgrep) with normalized output
+    title: SAST runner (OpenGrep) with normalized output
     deps: [F-04]
     agent: builder
     do: >
-      Run Semgrep with its registry rulesets against the workspace.
+      Run OpenGrep with OSS-licensed rulesets against the workspace.
+      Semgrep registry rules are NOT usable - see docs/BUSINESS-MODEL.md.
       Parse JSON output into the Finding model: rule_id, message,
       severity, file, line, enclosing symbol, cwe, owasp.
       Fixture repo in tests/fixtures/vuln-app with known injectable

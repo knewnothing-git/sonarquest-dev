@@ -13,6 +13,7 @@
 
 ## Checklist
 
+- [ ] I have read and agree to the Contributor Licence Agreement in CLA.md
 - [ ] `make check` passes
 - [ ] Tests added or updated
 - [ ] No line-number dependency introduced in fingerprinting

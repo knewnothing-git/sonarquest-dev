@@ -274,3 +274,61 @@ from the approved dependency list in `CLAUDE.md` or add one and log why.
 
 **Reverses if:** a locked component fails a node's verify and no
 workaround exists.
+
+---
+
+## D-013 — Replace Semgrep with OpenGrep
+
+**Date:** 2026-08-29 · **Status:** Decided · **Amends:** D-012
+
+Semgrep's engine remains LGPL-2.1, but in December 2024 its maintained
+rules moved to the Semgrep Rules License v1.0 — usable only in internal,
+non-competing, non-SaaS contexts. A commercial SAST platform is exactly
+what that excludes, so the rules cannot ship here. The rules are where
+the value sits; an engine with no usable rules is not a scanner.
+
+Replaced with **OpenGrep**: an LGPL-2.1 community fork of Semgrep CE
+created January 2025, restoring cross-function taint analysis,
+inter-procedural scanning and fingerprinting. Backward compatible with
+Semgrep's rule format, JSON and SARIF output. 30+ languages, taint
+tracking across 12. Governed by a consortium of 10+ appsec companies
+rather than a single vendor.
+
+Integration is subprocess execution only. LGPL-2.1 copyleft means the
+binary is never linked or vendored.
+
+Rule sources are checked individually — registry rules inherit their
+source repository's licence, and some are proprietary or AGPL.
+
+**Reverses if:** OpenGrep stalls as a project, or Semgrep relicenses.
+
+---
+
+## D-014 — AGPL-3.0 with a Contributor Licence Agreement
+
+**Date:** 2026-08-29 · **Status:** Decided
+
+Licence: AGPL-3.0. Business model: open core with a commercial dual
+licence. Full reasoning in `docs/BUSINESS-MODEL.md`.
+
+Three reasons AGPL over Apache-2.0 or BSL:
+
+1. Free self-hosting is the only distribution channel available without
+   a brand, sales team or marketing budget.
+2. AGPL's network clause stops a competitor launching a hosted version
+   without publishing their changes. Apache-2.0 would permit it.
+3. Enterprises that prohibit AGPL become commercial-licence customers.
+   The friction is the sales channel.
+
+**The CLA is load-bearing, not paperwork.** Contributions without a
+copyright grant stay AGPL-only and can never be included in the
+commercially licensed build. Merging one un-CLA'd PR into the core
+permanently contaminates the dual-licence model. Every PR must carry the
+agreement line.
+
+Paid features live in separate private repositories that consume the
+public core. Never the inverse — an AGPL core importing proprietary code
+is a licence violation.
+
+**Reverses if:** the commercial licence generates no revenue after a
+serious attempt, in which case Apache-2.0 maximises adoption instead.

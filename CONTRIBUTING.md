@@ -5,10 +5,29 @@ platform — an open alternative to SonarQube and Black Duck in one tool.
 
 Contributions are welcome from anyone. You do not need to be invited.
 
-> **Licence pending.** A licence file has not been added yet. Until it is,
-> the terms under which contributions are accepted are undefined. If you
-> plan a substantial contribution, open an issue first and we will settle
-> this before you spend time.
+## Licence and the CLA
+
+SonarQuest is **AGPL-3.0**. See [LICENSE](LICENSE).
+
+It is also offered under a separate commercial licence to organisations
+that cannot use AGPL code. That dual licence funds the project.
+
+**Because of that, every contributor must agree to the
+[Contributor Licence Agreement](CLA.md) before a PR is merged.** You keep
+your copyright — you are granting the right to include your code in the
+commercially licensed build. Same arrangement Grafana, MongoDB and Qt use.
+
+Agreeing takes one line in your first PR description:
+
+`+"`"+
+I have read and agree to the Contributor Licence Agreement in CLA.md.
+`+"`"+
+
+One agreement covers everything you contribute afterwards.
+
+If you would rather not sign, you can still report bugs, improve docs,
+and test on your own codebases. Those need no agreement and are genuinely
+valuable.
 
 ---
 
@@ -18,7 +37,7 @@ You do not have to write a scanner to be useful.
 
 | | |
 |---|---|
-| **Rules** | Semgrep rules for languages or frameworks we cover badly |
+| **Rules** | OpenGrep rules for languages or frameworks we cover badly |
 | **Language support** | Package manifest parsers, language detection |
 | **False positives** | Report them with a reproducing snippet. This is the most valuable bug report you can file. |
 | **Integrations** | GitLab, Bitbucket, Jenkins, Azure DevOps |
@@ -59,7 +78,7 @@ backend/
   app/
     api/          FastAPI routes (/api/v1)
     models/       SQLAlchemy models
-    scanners/     Semgrep, Syft, Grype, OSV, ScanCode wrappers
+    scanners/     OpenGrep, Syft, Grype, OSV, ScanCode wrappers
     core/         fingerprinting, baseline diff, quality gates
     tasks/        Celery orchestration
   tests/
@@ -189,7 +208,7 @@ public issue. Open a GitHub security advisory on the repository instead.
 
 ## Good first contributions
 
-- Add a Semgrep rule for a framework you know well
+- Add an OpenGrep rule for a framework you know well
 - Add a package manifest parser for a language we do not cover
 - Improve an error message you found confusing during setup
 - Write the deployment guide for your platform

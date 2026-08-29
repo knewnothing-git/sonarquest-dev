@@ -21,7 +21,7 @@
       "Bash(node:*)",
       "Bash(docker:*)",
       "Bash(docker-compose:*)",
-      "Bash(semgrep:*)",
+      "Bash(opengrep:*)",
       "Bash(syft:*)",
       "Bash(grype:*)",
       "Bash(git status)",
