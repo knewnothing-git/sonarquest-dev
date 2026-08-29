@@ -1,273 +1,219 @@
-# SonarQuest task graph
+# SonarQuest build graph
 #
-# A node is workable when every id in `deps` is done AND `gate`
-# evaluates true against graph/state.json.
+# Every `verify` is a shell command. Exit 0 = node done.
+# No node requires human judgment. If one seems to, its verify is wrong.
 #
-# human_only: true    Claude cannot execute this. Surface it, never simulate.
-# he_verifies: true   Completion is Yogesh's judgment call. Claude presents
-#                     evidence and stops. Claude never marks these done.
+# Run from repo root. Agent updates graph/state.json after each node.
 
 meta:
-  version: 2
+  version: 3
   updated: 2026-08-29
-  note: >
-    v2 replaces the C++ engine spike with a thin Python prototype.
-    Reason: every node must produce something the decision maker can
-    verify himself. See DECISIONS.md D-009.
-
-gates:
-  phase0_go:
-    expr: "phase0.decision == 'GO'"
-    description: >
-      At least 8 of 15 discovery calls scored 4 or higher. Set only by
-      Yogesh via /score. Threshold locked before data collection.
-  legal_clear:
-    expr: "legal.misra_opinion == 'received' and legal.path != 'blocked'"
-    description: >
-      Written IP counsel opinion on MISRA text licensing in hand, and it
-      does not close off a viable path.
-  prototype_useful:
-    expr: "prototype.gcs_judged == true and prototype.gcs_verdict != 'reject'"
-    description: >
-      Yogesh has looked at a generated Guideline Compliance Summary and
-      judged it against his own audit experience. His verdict, not a
-      metric.
+  product: "Unified SAST + SCA platform (SonarQube + Black Duck alternative)"
 
 nodes:
 
-# ---------------------------------------------------------------
-# TRACK: phase-0  — market validation. Human-led.
-# ---------------------------------------------------------------
+# ===== PHASE 1: FOUNDATION =====
 
-  - id: P0-01
-    track: phase-0
-    title: Email MISRA on licensing
+  - id: F-01
+    title: Repo scaffold and toolchain
     deps: []
-    gate: always
-    agent: scribe
-    human_only: false
-    he_verifies: false
-    do: >
-      Draft the four-question licensing email from docs/04-phase-0.md
-      section 6. Show it to him. He sends it.
-    verify: "state.legal.misra_email_sent has a date"
-
-  - id: P0-02
-    track: phase-0
-    title: Engage IP counsel on MISRA text
-    deps: [P0-01]
-    gate: always
-    agent: human
-    human_only: true
-    he_verifies: true
-    do: >
-      Brief counsel with the six questions in docs/04-phase-0.md.
-      Budget INR 50k-1.5L. Written opinion, not verbal.
-    verify: "state.legal.misra_opinion == 'received'"
-
-  - id: P0-03
-    track: phase-0
-    title: Build 60-name target list
-    deps: []
-    gate: always
-    agent: researcher
-    human_only: false
-    he_verifies: false
-    do: >
-      Expand the four tranches in docs/04-phase-0.md into
-      validation/targets.md. Verify each company exists and the role is
-      plausible - the doc list is unverified general knowledge.
-      He can spot-check this, so work through it and then report.
-    verify: "validation/targets.md has >= 60 rows with named roles"
-
-  - id: P0-04
-    track: phase-0
-    title: Outreach wave 1
-    deps: [P0-03]
-    gate: always
-    agent: human
-    human_only: true
-    he_verifies: true
-    do: "40 LinkedIn messages, template A. Consultants and EV first."
-    verify: "state.phase0.outreach_sent >= 40"
-
-  - id: P0-05
-    track: phase-0
-    title: Conduct 15 discovery calls
-    deps: [P0-04]
-    gate: always
-    agent: human
-    human_only: true
-    he_verifies: true
-    do: >
-      Run the script in docs/04-phase-0.md. Never pitch. Log each call
-      within 30 minutes via /log-call. Q12 - where the GCS lives - must
-      be asked in every call.
-    verify: "count(validation/calls/*.md) >= 15"
-
-  - id: P0-06
-    track: phase-0
-    title: Score and decide GO/NO-GO
-    deps: [P0-05]
-    gate: always
-    agent: researcher
-    human_only: false
-    he_verifies: true
-    do: >
-      Tally scores. Report the count scoring 4+ and the Q12 answers
-      verbatim. Present the number against the locked threshold.
-      Do not recommend. He decides.
-    verify: "state.phase0.decision in ['GO','NO-GO','RESEGMENT']"
-
-# ---------------------------------------------------------------
-# TRACK: prototype — thin Python wrapper. Every node ends in an
-# artifact Yogesh can judge from his own quality-engineering
-# experience. Parallel to phase-0.
-#
-# GPL-3.0 encumbered (wraps Cppcheck MISRA addon). Validation and
-# demo only. Never shippable.
-# ---------------------------------------------------------------
-
-  - id: TP-01
-    track: prototype
-    title: Run Cppcheck MISRA addon and normalize its output
-    deps: []
-    gate: always
     agent: builder
-    human_only: false
-    he_verifies: false
     do: >
-      Python. Run the addon over a codebase, parse its output into a
-      normalized finding record: rule_id, file, line, enclosing symbol,
-      category. Nothing clever. One script.
-      Explain in plain language what it does before writing it.
-    verify: "Produces a JSON list of findings from a real codebase"
+      Create backend/ (Python 3.12, pyproject.toml, ruff, mypy, pytest),
+      frontend/ (Vite + React + TS + Tailwind), docker-compose.yml with
+      postgres + redis, Makefile with targets: install, lint, test, check,
+      up, down. .env.example with all config keys.
+    verify: "make check"
 
-  - id: TP-02
-    track: prototype
-    title: Pick and justify a test codebase
-    deps: []
-    gate: always
-    agent: researcher
-    human_only: false
-    he_verifies: true
-    do: >
-      Propose 2-3 open-source embedded C codebases. For each, say why it
-      does or does not resemble what a Tier-2 supplier's ECU code looks
-      like. He knows what real automotive code looks like; you do not.
-      He picks.
-    verify: "state.prototype.corpus is set by Yogesh"
-
-  - id: TP-03
-    track: prototype
-    title: Stable finding fingerprints
-    deps: [TP-01, TP-02]
-    gate: always
+  - id: F-02
+    title: FastAPI skeleton with health and version
+    deps: [F-01]
     agent: builder
-    human_only: false
-    he_verifies: false
     do: >
-      Fingerprint on (rule_id, normalized surrounding code hash,
-      enclosing symbol). Never line number.
-      Demonstrate by reformatting the codebase and showing the
-      fingerprint set is unchanged.
-    verify: "clang-format over the corpus changes 0 fingerprints"
+      FastAPI app at backend/app/main.py. Routes /health (200, db+redis
+      connectivity) and /api/v1/version. structlog JSON logging.
+      Settings via pydantic-settings from env.
+    verify: "make test-api"
 
-  - id: TP-04
-    track: prototype
-    title: Deviation register and GRP
-    deps: [TP-03]
-    gate: always
+  - id: F-03
+    title: Database schema and migrations
+    deps: [F-02]
     agent: builder
-    human_only: false
-    he_verifies: true
     do: >
-      The workflow: raise -> rationale -> risk -> reviewer -> approver
-      -> expiry. Plus per-project rule re-categorization (GRP).
-      Before building: show him the data model in plain language and ask
-      whether it matches how a real quality department works. He has run
-      this process; you have only read about it.
-    verify: >
-      Yogesh confirms the workflow matches real quality-department
-      practice, or says what is missing.
+      SQLAlchemy 2.x models + Alembic. Tables: organizations, projects,
+      scans, findings, components, vulnerabilities, licenses,
+      quality_gates, gate_results, suppressions.
+      findings has fingerprint (unique per project), rule_id, severity,
+      status, first_seen_scan, last_seen_scan.
+    verify: "make migrate && make test-models"
 
-  - id: TP-05
-    track: prototype
-    title: Generate a Guideline Compliance Summary
-    deps: [TP-04]
-    gate: always
+# ===== PHASE 2: SCANNERS =====
+
+  - id: F-04
+    title: Repo ingestion and language detection
+    deps: [F-03]
     agent: builder
-    human_only: false
-    he_verifies: true
     do: >
-      Produce a GCS document from the findings and deviation records,
-      following the MISRA:2020 compliance-level structure
-      (Compliant / Deviations / Violations / Disapplied).
-      This is the product in miniature.
-    verify: "A GCS document is produced from real data"
+      Clone a git repo (gitpython) at a ref into a temp workspace.
+      Detect languages by extension + content heuristics. Return a
+      manifest: languages, file counts, package manifests found
+      (package.json, requirements.txt, pom.xml, go.mod, Cargo.toml,
+      pyproject.toml, build.gradle).
+    verify: "pytest backend/tests/test_ingest.py -q"
 
-  - id: TP-06
-    track: prototype
-    title: Yogesh audits the GCS
-    deps: [TP-05]
-    gate: always
-    agent: human
-    human_only: true
-    he_verifies: true
-    do: >
-      Read the generated GCS as if you were an OEM assessor receiving it
-      from a supplier. Where would you reject it? What is missing that a
-      real audit would demand? What would embarrass you to hand over?
-      This is the highest-value hour in the whole project. Nobody else
-      involved can do it.
-      Record the verdict in state: accept / needs-work / reject.
-    verify: "state.prototype.gcs_judged == true"
-
-  - id: TP-07
-    track: prototype
-    title: Show the GCS to an external Functional Safety Manager
-    deps: [TP-06]
-    gate: prototype_useful
-    agent: human
-    human_only: true
-    he_verifies: true
-    do: >
-      One of the Phase 0 consultant contacts. Not a pitch - a critique
-      request. "Would this survive an assessment?"
-    verify: "External written or verbal verdict recorded in validation/"
-
-# ---------------------------------------------------------------
-# TRACK: product — blocked on Phase 0.
-# ---------------------------------------------------------------
-
-  - id: PR-01
-    track: product
-    title: Productionize the compliance workspace
-    deps: [P0-06, TP-07]
-    gate: phase0_go
+  - id: F-05
+    title: SAST runner (Semgrep) with normalized output
+    deps: [F-04]
     agent: builder
-    human_only: false
-    he_verifies: true
-    do: "See docs/02-product.md Module 2. Scope after Phase 0 findings."
-    verify: "A design partner runs a real deviation end to end"
-
-  - id: PR-02
-    track: product
-    title: Replace the GPL detector
-    deps: [PR-01]
-    gate: [phase0_go, legal_clear]
-    agent: builder
-    human_only: false
-    he_verifies: false
     do: >
-      The prototype's detector is GPL-3.0 and cannot ship. Options to
-      evaluate at that point: license a commercial engine, build on
-      Clang, or partner. This is where the C++ work returns, funded, and
-      probably not done solo.
-    verify: "Shippable detector in place, licensing cleared in writing"
+      Run Semgrep with its registry rulesets against the workspace.
+      Parse JSON output into the Finding model: rule_id, message,
+      severity, file, line, enclosing symbol, cwe, owasp.
+      Fixture repo in tests/fixtures/vuln-app with known injectable
+      findings (SQL injection, hardcoded secret, path traversal).
+    verify: "pytest backend/tests/test_sast.py -q"
 
-# ---------------------------------------------------------------
-# TRACK: engine — DEFERRED. Not staffed, not scheduled.
-# The C++ Clang analyzer. Superseded for now by TP-01.
-# See DECISIONS.md D-009.
-# ---------------------------------------------------------------
+  - id: F-06
+    title: SBOM generation (Syft)
+    deps: [F-04]
+    agent: builder
+    do: >
+      Run Syft over the workspace. Parse into Component records: purl,
+      name, version, type, direct/transitive, source manifest.
+      Export CycloneDX 1.5 and SPDX 2.3 via cyclonedx-python-lib.
+    verify: "pytest backend/tests/test_sbom.py -q"
+
+  - id: F-07
+    title: Vulnerability matching (Grype + OSV)
+    deps: [F-06]
+    agent: builder
+    do: >
+      Match components against Grype db and the OSV API. Deduplicate by
+      CVE. Record CVSS score, severity, fixed-in version, and whether a
+      fix is available. Fixture with a pinned known-vulnerable dependency.
+    verify: "pytest backend/tests/test_vulns.py -q"
+
+  - id: F-08
+    title: License detection and policy
+    deps: [F-06]
+    agent: builder
+    do: >
+      Identify declared licenses per component. Normalize to SPDX
+      identifiers. Policy engine: allowlist / denylist / review-required,
+      configurable per project. Flag copyleft (GPL, AGPL, LGPL) and
+      unknown licenses.
+    verify: "pytest backend/tests/test_licenses.py -q"
+
+# ===== PHASE 3: CORE LOGIC =====
+
+  - id: F-09
+    title: Fingerprinting and baseline diff
+    deps: [F-05, F-07]
+    agent: builder
+    do: >
+      Fingerprint findings on (rule_id, normalized_snippet_hash,
+      enclosing_symbol). Never line number. Diff a scan against the
+      project baseline into new / fixed / unchanged.
+      Test must prove reformatting the fixture repo changes zero
+      fingerprints.
+    verify: "pytest backend/tests/test_fingerprint.py -q"
+
+  - id: F-10
+    title: Quality gate engine
+    deps: [F-09]
+    agent: builder
+    do: >
+      Conditions on metrics: new critical findings, new high vulns,
+      denied licenses, coverage delta, total blocker count.
+      Operators: gt, lt, eq. Evaluate a scan, return PASS/FAIL with the
+      failing conditions listed. Ship a sensible default gate.
+    verify: "pytest backend/tests/test_gates.py -q"
+
+  - id: F-11
+    title: Scan orchestration
+    deps: [F-08, F-10]
+    agent: builder
+    do: >
+      Celery task chain: ingest -> run SAST + SCA in parallel ->
+      normalize -> fingerprint -> diff baseline -> evaluate gate ->
+      persist -> emit result. Scan status transitions with timestamps.
+      Retry on transient failures. Hard timeout per scanner.
+    verify: "pytest backend/tests/test_orchestration.py -q"
+
+# ===== PHASE 4: SURFACES =====
+
+  - id: F-12
+    title: REST API v1
+    deps: [F-11]
+    agent: builder
+    do: >
+      /api/v1: projects CRUD, trigger scan, scan status, findings list
+      with filters (severity, status, type, file), components list,
+      vulnerabilities, SBOM export, gate config, suppressions.
+      Pagination, sorting, and filtering on all list endpoints.
+    verify: "pytest backend/tests/test_api.py -q && make openapi-validate"
+
+  - id: F-13
+    title: CLI scanner
+    deps: [F-11]
+    agent: builder
+    do: >
+      Typer CLI: `sq scan <path>` runs a local scan and prints a report.
+      `--format json|table|sarif`. `--fail-on-gate` exits non-zero when
+      the gate fails, so it drops straight into any CI.
+    verify: "pytest backend/tests/test_cli.py -q"
+
+  - id: F-14
+    title: Dashboard frontend
+    deps: [F-12]
+    agent: builder
+    do: >
+      React + Vite + Tailwind. Pages: project list, project overview
+      (gate status, finding counts, trend chart), findings table with
+      filters, dependency inventory, vulnerabilities, license report,
+      SBOM download. Dark theme, dense information layout.
+    verify: "cd frontend && npm run build && npm run test -- --run"
+
+  - id: F-15
+    title: GitHub App and PR decoration
+    deps: [F-12]
+    agent: builder
+    do: >
+      GitHub App: webhook receiver for push and pull_request, HMAC
+      signature verification, scan trigger, check run creation, inline
+      review comments on new findings only, gate result as a required
+      status check. Mock the GitHub API in tests.
+    verify: "pytest backend/tests/test_github.py -q"
+
+  - id: F-16
+    title: Auth and multi-tenancy
+    deps: [F-12]
+    agent: builder
+    do: >
+      Organizations, users, API tokens. Role-based access: owner, admin,
+      member, viewer. All queries scoped by organization. Token auth for
+      CI, session auth for the dashboard.
+    verify: "pytest backend/tests/test_auth.py -q"
+
+# ===== PHASE 5: SHIP =====
+
+  - id: F-17
+    title: Production compose and deployment docs
+    deps: [F-14, F-15, F-16]
+    agent: builder
+    do: >
+      docker-compose.prod.yml: api, worker, beat, postgres, redis,
+      frontend behind caddy with TLS. Healthchecks, restart policies,
+      volume mounts. .env.prod.example. DEPLOY.md with a full walkthrough
+      from clean host to running instance.
+    verify: "make deploy-check"
+
+  - id: F-18
+    title: End-to-end smoke test
+    deps: [F-17]
+    agent: builder
+    do: >
+      Bring up the prod stack, register a project pointing at the fixture
+      repo, trigger a scan, poll to completion, assert findings and
+      components landed and the gate evaluated. Tear down.
+    verify: "make e2e"

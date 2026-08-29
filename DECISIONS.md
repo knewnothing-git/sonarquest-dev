@@ -236,3 +236,41 @@ intending to review carefully is not one.
 **Reverses if:** never in spirit. The specific mechanisms can change as
 his familiarity with the codebase grows — a node that needs approval
 today may not in a year.
+
+---
+
+## D-011 — Pivot to the original goal: SonarQube + Black Duck alternative
+
+**Date:** 2026-08-29 · **Status:** Decided · **Supersedes:** D-003, D-009, D-010
+
+Direction set by the founder: build a unified SAST + SCA platform. The
+MISRA / ISO 26262 automotive vertical explored in D-003 through D-010 is
+archived to docs/archive/ and reduced to a backlog item — a rulepack on
+this engine rather than a separate product.
+
+Operating model is autonomous, not gated. Decisions are made by policy at
+build time and logged here after the fact, rather than escalated for
+approval beforehand.
+
+What makes that safe: every node in graph/nodes.yaml carries a erify
+that is a shell command returning 0 or non-zero. Completion is machine
+checked. No node requires a judgment call, and any node that appears to
+has a defective verify that should be fixed rather than escalated.
+
+**Reverses if:** the founder says otherwise.
+
+---
+
+## D-012 — Stack locked
+
+**Date:** 2026-08-29 · **Status:** Decided
+
+Python 3.12 / FastAPI / SQLAlchemy 2.x / Alembic / Celery / Redis /
+PostgreSQL 16 · React 18 + Vite + TypeScript + Tailwind · Semgrep (SAST),
+Syft (SBOM), Grype + OSV (vulnerabilities), ScanCode (licenses) · Docker.
+
+Locked so the build loop never stalls on a technology debate. Agents pick
+from the approved dependency list in `CLAUDE.md` or add one and log why.
+
+**Reverses if:** a locked component fails a node's verify and no
+workaround exists.

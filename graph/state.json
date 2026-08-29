@@ -1,59 +1,34 @@
 {
-  "_comment": "Source of truth for node status. Unknown is 'unset' or null, never a plausible placeholder. Claude never sets fields marked owner:yogesh.",
+  "_comment": "Agent updates this after every node. status: ready | active | done | blocked",
   "updated": "2026-08-29",
-  "graph_version": 2,
+  "graph_version": 3,
+  "mode": "autonomous",
 
-  "mode": "driver",
-  "_mode_note": "driver = one step at a time, stop after each. autopilot must be granted per-node, out loud, and never carries over.",
-
-  "phase0": {
-    "decision": "unset",
-    "_decision_owner": "yogesh",
-    "outreach_sent": 0,
-    "calls_logged": 0,
-    "calls_scoring_4plus": 0,
-    "threshold": 8,
-    "threshold_locked": true,
-    "_note": "threshold was set before data collection and must not move afterwards"
-  },
-
-  "legal": {
-    "misra_email_sent": null,
-    "misra_reply": "unset",
-    "misra_opinion": "unset",
-    "path": "unset",
-    "_note": "path: unset | rule-ids-only | licensed | customer-supplied | blocked"
-  },
-
-  "prototype": {
-    "corpus": null,
-    "_corpus_owner": "yogesh",
-    "findings_normalized": false,
-    "fingerprints_stable": false,
-    "gcs_generated": false,
-    "gcs_judged": false,
-    "gcs_verdict": "unset",
-    "_gcs_verdict_owner": "yogesh",
-    "_note": "gcs_verdict: unset | accept | needs-work | reject. This is a professional judgment, not a metric. Claude never sets it."
+  "run": {
+    "current_node": null,
+    "attempts": 0,
+    "max_attempts": 3,
+    "last_error": null
   },
 
   "nodes": {
-    "P0-01": "ready",
-    "P0-02": "blocked",
-    "P0-03": "ready",
-    "P0-04": "blocked",
-    "P0-05": "blocked",
-    "P0-06": "blocked",
-
-    "TP-01": "ready",
-    "TP-02": "ready",
-    "TP-03": "blocked",
-    "TP-04": "blocked",
-    "TP-05": "blocked",
-    "TP-06": "blocked",
-    "TP-07": "blocked",
-
-    "PR-01": "blocked",
-    "PR-02": "blocked"
+    "F-01": "ready",
+    "F-02": "blocked",
+    "F-03": "blocked",
+    "F-04": "blocked",
+    "F-05": "blocked",
+    "F-06": "blocked",
+    "F-07": "blocked",
+    "F-08": "blocked",
+    "F-09": "blocked",
+    "F-10": "blocked",
+    "F-11": "blocked",
+    "F-12": "blocked",
+    "F-13": "blocked",
+    "F-14": "blocked",
+    "F-15": "blocked",
+    "F-16": "blocked",
+    "F-17": "blocked",
+    "F-18": "blocked"
   }
 }

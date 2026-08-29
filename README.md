@@ -1,54 +1,84 @@
 # SonarQuest
 
-Compliance evidence platform for safety-critical embedded software.
+Unified code quality and software composition analysis. Open alternative
+to SonarQube (SAST, quality gates) and Black Duck (SCA, SBOM, license
+compliance).
 
-**Status:** Pre-validation. No code yet. Phase 0 (market validation) not started.
-
----
-
-## What this is
-
-Static analysis tools find MISRA violations. They are weak at everything
-that happens next: triaging thousands of findings, clustering them into
-deviation use-cases, writing justification rationales, getting them
-approved, and producing an auditable Guideline Compliance Summary that
-survives an OEM audit.
-
-That downstream workflow is where the engineer-time and the anxiety
-actually live. SonarQuest targets that gap.
-
-**Positioning:** *"Helix QAC finds your violations. SonarQuest gets you
-through the audit."*
-
-**Not** a SonarQube competitor. The competitors are LDRA, Perforce Helix
-QAC, Parasoft, and MathWorks Polyspace.
+**Status:** In build. See `/status`.
 
 ---
 
-## Documents
+## What it does
 
-| File | Contents |
+**Code analysis** — multi-language SAST via Semgrep, security and quality
+findings, fingerprinted so suppressions survive refactoring, baseline
+diffing so you can enforce on new code only, quality gates that fail CI.
+
+**Dependency analysis** — full component inventory including transitive
+deps, CVE matching against Grype and OSV, SPDX license identification
+with policy enforcement, SBOM export in CycloneDX and SPDX.
+
+One platform, one gate, one dashboard. SonarQube does not do SCA well;
+Black Duck does not do SAST. That gap is the product.
+
+---
+
+## Stack
+
+Python 3.12 / FastAPI / Celery / PostgreSQL / Redis · React + Vite +
+TypeScript + Tailwind · Semgrep, Syft, Grype, OSV, ScanCode · Docker
+
+---
+
+## Build system
+
+This repo builds itself through Claude Code.
+
+```
+CLAUDE.md          product spec + autonomous decision policies
+graph/nodes.yaml   18-node build DAG, each with a runnable verify command
+graph/state.json   live status
+DECISIONS.md       every autonomous choice, logged
+BACKLOG.md         deferred ideas
+```
+
+**Commands**
+
+| | |
 |---|---|
-| [DECISIONS.md](DECISIONS.md) | Decision log — what was chosen, what was rejected, why |
-| [docs/01-strategy.md](docs/01-strategy.md) | Vertical selection, thesis, competitive landscape |
-| [docs/02-product.md](docs/02-product.md) | Product definition and technical architecture |
-| [docs/03-gtm.md](docs/03-gtm.md) | Pricing, go-to-market, roadmap, risks |
-| [docs/04-phase-0.md](docs/04-phase-0.md) | Validation kit — call script, scoring, target list |
+| `/run` | Build autonomously until blocked or complete |
+| `/run F-05` | Build one node |
+| `/next` | Build the next node, then stop |
+| `/status` | Progress and blockers |
+
+Every node's completion is a shell command that exits 0 or non-zero.
+Nothing is "done" by judgment.
 
 ---
 
-## Immediate next step
+## Getting started
 
-Phase 0 validation. 15 discovery calls over 4 weeks, plus an IP counsel
-consult on MISRA text licensing. No code until the thesis is confirmed.
-
-Go/no-go threshold and kill criteria are in `docs/04-phase-0.md`.
+```bash
+make install
+make up
+/run
+```
 
 ---
 
-## Open items
+## Phases
 
-- `.gitignor` in repo root is misnamed (missing `e`) — currently inert
-- Stale `master` branch exists with a divergent initial commit
-- Project name "SonarQuest" anchors to SonarQube, which is the wrong
-  frame for this positioning — rename under consideration
+| Phase | Nodes | Scope |
+|---|---|---|
+| 1 Foundation | F-01…03 | Scaffold, API skeleton, schema |
+| 2 Scanners | F-04…08 | Ingest, SAST, SBOM, vulns, licenses |
+| 3 Core | F-09…11 | Fingerprinting, gates, orchestration |
+| 4 Surfaces | F-12…16 | API, CLI, dashboard, GitHub App, auth |
+| 5 Ship | F-17…18 | Production compose, E2E smoke |
+
+---
+
+## docs/archive
+
+Earlier strategy work on a MISRA / ISO 26262 automotive vertical.
+Retained as reference — not the current direction.
